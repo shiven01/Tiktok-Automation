@@ -15,7 +15,7 @@ completion = client.chat.completions.create(
     model="gpt-4o-mini",  # Model name
     messages=[  # Conversation setup
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Write a haiku about recursion in programming."}
+        {"role": "user", "content": "Is Chelsea (a girl) mad?."}
     ]
 )
 
