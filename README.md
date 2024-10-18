@@ -1,24 +1,43 @@
 # Reddit to TikTok Automation
 
-This project automates the process of creating TikTok videos from Reddit posts. It scrapes data from Reddit, converts the text to speech, and combines it with video content for TikTok.
+This project automates the creation of TikTok videos using content from Reddit posts and background videos from YouTube.
 
 ## Features
 
 - Scrapes text content from Reddit posts using PRAW
+- Downloads background videos from YouTube
 - Converts text to speech using ElevenLabs API
-- (Planned) Combines audio with video for TikTok content
-- (Planned) Automates posting to TikTok
+- Generates subtitles for the speech
+- Combines all elements into a final video
+
+## Prerequisites
+
+- Python 3.7+
+- FFmpeg
+- eSpeak
+
+Ensure these executables can be called from your shell:
+```
+espeak, ffmpeg, ffprobe, pip, python
+```
 
 ## Setup
 
 1. Clone this repository
-2. Install required packages: `pip install -r requirements.txt`
-3. Copy `.env.template` to `.env` and fill in your API credentials (Reddit, ElevenLabs, and TikTok)
-4. Run the script: `python reddit-elevenlabs-test.py`
+2. Install required packages:
+   ```
+   pip install numpy aeneas
+   pip install -r requirements.txt
+   ```
+3. Verify Aeneas installation:
+   ```
+   python -m aeneas.diagnostics
+   ```
+4. Copy `.env.template` to `.env` and fill in your API credentials
 
 ## Environment Variables
 
-This project uses the following environment variables:
+Set up the following environment variables in your `.env` file:
 
 - REDDIT_CLIENT_ID
 - REDDIT_CLIENT_SECRET
@@ -26,20 +45,25 @@ This project uses the following environment variables:
 - REDDIT_USER_AGENT
 - REDDIT_USER_USERNAME
 - XI_API_KEY (ElevenLabs API key)
-
-Make sure to set these in your `.env` file or in your environment before running the script.
+- YT_MP4_RAPIDAPI_KEY (YouTube to MP4 conversion API key)
 
 ## Usage
 
-1. Run the script and enter a Reddit post URL when prompted
-2. The script will scrape the post content and convert it to speech
-3. (Planned) The script will combine the audio with video content
-4. (Planned) The resulting video will be automatically posted to TikTok
+Run the script:
+
+```
+python video-generator.py
+```
+
+Follow the prompts to enter:
+1. The URL of the Reddit post
+2. The URL of the YouTube video to use as background
+
+The script will generate a video file named `reddit_post_video.mp4`.
 
 ## Future Development
 
-- Implement video creation functionality
-- Add TikTok API integration for automated posting
+- Implement TikTok API integration for automated posting
 - Develop a user interface for easier operation
 - Implement content filtering and customization options
 
@@ -77,4 +101,4 @@ SOFTWARE.
 
 ## Disclaimer
 
-This tool is for educational purposes only. Ensure you comply with Reddit's API terms of service and TikTok's community guidelines when using this tool.
+This tool is for educational purposes only. Ensure you comply with Reddit's API terms of service, YouTube's terms of service, and TikTok's community guidelines when using this tool.
