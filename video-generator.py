@@ -70,15 +70,10 @@ def download_youtube_video(youtube_url):
         "x-rapidapi-key": RAPIDAPI_KEY
     }
 
-    print(f"Making request to: {url}")
-    print(f"Headers: {headers}")
-
+    print("Fetching video information...")
     try:
-        response = requests.get(url, headers=headers)
-        print(f"Response status code: {response.status_code}")
-        print(f"Response headers: {response.headers}")
-        print(f"Response content: {response.text[:500]}...")  # Print first 500 characters
-
+        # First request to get video info with timeout
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
         
@@ -87,24 +82,49 @@ def download_youtube_video(youtube_url):
             return None
         
         video_url = data['formats'][-1]['url']
-        print(f"Video URL: {video_url}")
-
-        video_response = requests.get(video_url)
-        video_response.raise_for_status()
+        print("Starting video download...")
         
-        with open("background.mp4", "wb") as f:
-            f.write(video_response.content)
-        print("YouTube video downloaded successfully as 'background.mp4'")
-        return "background.mp4"
+        # Download with stream=True for better handling of large files
+        with requests.get(video_url, stream=True, timeout=30) as video_response:
+            video_response.raise_for_status()
+            total_size = int(video_response.headers.get('content-length', 0))
+            
+            with open("background.mp4", "wb") as f:
+                if total_size == 0:
+                    print("Warning: Content size unknown")
+                else:
+                    print(f"Total size: {total_size / (1024*1024):.1f} MB")
+                
+                block_size = 1024*1024  # 1MB chunks
+                downloaded = 0
+                
+                for chunk in video_response.iter_content(chunk_size=block_size):
+                    if chunk:
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total_size > 0:
+                            percent = (downloaded / total_size) * 100
+                            print(f"\rDownload progress: {percent:.1f}% ({downloaded/(1024*1024):.1f} MB)", end="")
+                
+                print("\nDownload completed!")
+                return "background.mp4"
     
+    except requests.exceptions.Timeout:
+        print("\nError: Download timed out. Please try again or choose a different video.")
     except requests.exceptions.RequestException as e:
-        print(f"Error during API request: {e}")
-        if response.status_code == 401:
-            print("API key may be invalid or expired.")
-        elif response.status_code == 429:
-            print("Rate limit exceeded. Please wait before trying again.")
+        print(f"\nError during API request: {e}")
+        if hasattr(response, 'status_code'):
+            if response.status_code == 401:
+                print("API key may be invalid or expired.")
+            elif response.status_code == 429:
+                print("Rate limit exceeded. Please wait before trying again.")
+    except KeyboardInterrupt:
+        print("\nDownload cancelled by user.")
+        # Clean up partial download if it exists
+        if os.path.exists("background.mp4"):
+            os.remove("background.mp4")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"\nAn unexpected error occurred: {e}")
     
     return None
 
