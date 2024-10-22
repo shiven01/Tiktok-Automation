@@ -200,18 +200,22 @@ def create_video(background_video, audio_file, subtitle_file, output_file):
     video = ffmpeg.input(background_video)
     audio = ffmpeg.input(audio_file)
     
-    # Scale the video and split the output
+    # Get the duration of the audio file
+    probe = ffmpeg.probe(audio_file)
+    audio_duration = float(probe['streams'][0]['duration'])
+    
+    # Scale the video and trim it to match the audio duration
     scaled = ffmpeg.filter(video, 'scale', 1080, 1920)
-    split = ffmpeg.filter(scaled, 'split')
+    trimmed = ffmpeg.filter(scaled, 'trim', duration=audio_duration)
     
-    # Apply subtitles to one of the split outputs
-    subtitled = ffmpeg.filter(split, 'subtitles', subtitle_file, force_style='Fontsize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Outline=1,Shadow=0,MarginV=20')
+    # Apply subtitles
+    subtitled = ffmpeg.filter(trimmed, 'subtitles', subtitle_file, force_style='Fontsize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Outline=1,Shadow=0,MarginV=20')
     
-    # Combine the video and audio
-    output = ffmpeg.output(subtitled, audio, output_file)
+    # Combine the video and audio, using the 'shortest' option
+    output = ffmpeg.output(subtitled, audio, output_file, shortest=None, acodec='aac', vcodec='libx264')
     
     try:
-        ffmpeg.run(output)
+        ffmpeg.run(output, overwrite_output=True)
         print(f"Video created successfully: {output_file}")
     except ffmpeg.Error as e:
         print(f"An error occurred while creating the video: {e.stderr.decode()}")
