@@ -130,7 +130,7 @@ def download_youtube_video(youtube_url):
 
 def get_reddit_post_text(url):
     submission = reddit.submission(url=url)
-    return f"Title: {submission.title}\n\nContent: {submission.selftext}"
+    return f"{submission.title}\n\n{submission.selftext}"
 
 def generate_speech(text):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
